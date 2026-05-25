@@ -85,3 +85,4 @@ All 30 onboarding screens:
 - Smooth slide transitions (350ms easeInOut)
 - Phone frame on desktop, full-screen on mobile
 - Haptic feedback on mobile (vibration API)
+# FlowState-web-demo
