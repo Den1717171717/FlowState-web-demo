@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <title>FlowState — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --accent:   #F49EAF;
+      --accent2:  #FFEDC2;
+      --text:     #2D2628;
+      --sub:      #8E8689;
+      --surface:  #FFF7F9;
+      --card:     #FFFFFF;
+      --border:   #EAE0E4;
+      --phase-f:  #7BA68B;
+      --phase-o:  #D9A055;
+      --phase-l:  #9C7A8E;
+      --phase-m:  #B25148;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;width:100%;overflow:hidden;background:var(--surface);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+    #app{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;background:#1A1F1C;padding:20px;gap:16px}
+    #phone-frame{position:relative;width:100%;max-width:393px;height:calc(100vh - 40px);max-height:852px;background:var(--surface);border-radius:40px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,0.08),0 40px 80px rgba(0,0,0,0.6),0 0 0 12px #1A1F1C,0 0 0 13px rgba(255,255,255,0.06)}
+    @media(max-width:500px){#app{padding:0}#phone-frame{max-width:100vw;height:100vh;height:100dvh;max-height:none;border-radius:0;box-shadow:none}}
+
+    /* ── APP SHELL ── */
+    .app-shell{display:flex;flex-direction:column;height:100%;background:var(--surface)}
+
+    /* ── STATUS BAR ── */
+    .status-bar{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;padding-top:env(safe-area-inset-top,0)}
+    .status-time{font-size:15px;font-weight:600;color:var(--text)}
+    .status-icons{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--text)}
+
+    /* ── TAB VIEWS ── */
+    .tab-view{flex:1;overflow:hidden;position:relative}
+    .tab-content{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:none}
+    .tab-content.active{display:block}
+
+    /* ── TAB BAR ── */
+    .tab-bar{display:flex;align-items:center;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0));background:var(--card);border-top:1px solid var(--border);flex-shrink:0}
+    .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border:none;background:none;cursor:pointer;border-radius:12px;transition:opacity 0.15s}
+    .tab-btn:active{opacity:0.7}
+    .tab-icon{font-size:22px;line-height:1}
+    .tab-label{font-size:10px;font-weight:600;color:var(--sub);letter-spacing:0.2px}
+    .tab-btn.active .tab-label{color:var(--accent)}
+
+    /* ── TODAY TAB ── */
+    .today-header{padding:20px 24px 16px;background:linear-gradient(160deg,var(--surface) 0%,rgba(244,158,175,0.06) 100%)}
+    .today-greeting{font-size:13px;font-weight:600;color:var(--sub);margin-bottom:4px}
+    .today-date{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.5px;margin-bottom:16px}
+    .phase-hero-card{background:linear-gradient(135deg,rgba(123,166,139,0.12),rgba(123,166,139,0.04));border:1.5px solid rgba(123,166,139,0.3);border-radius:24px;padding:20px;display:flex;align-items:center;gap:16px}
+    .phase-ring-sm{width:72px;height:72px;flex-shrink:0}
+    .phase-ring-sm svg{width:100%;height:100%}
+    .phase-info-label{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:#4F7A5C;margin-bottom:4px}
+    .phase-info-day{font-size:13px;font-weight:600;color:var(--sub);margin-bottom:6px}
+    .phase-info-tip{font-size:12px;color:var(--sub);line-height:1.4}
+
+    .section-title-sm{font-size:16px;font-weight:700;color:var(--text);margin:20px 24px 12px}
+
+    .today-workout-card{margin:0 24px 16px;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+    .twc-header{padding:16px 16px 0;display:flex;align-items:flex-start;justify-content:space-between}
+    .twc-tag{font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+    .twc-name{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+    .twc-meta{font-size:12px;color:var(--sub);margin-top:4px}
+    .twc-phase-dot{width:36px;height:36px;border-radius:12px;background:rgba(123,166,139,0.15);display:flex;align-items:center;justify-content:center;font-size:18px}
+    .twc-exercises{padding:12px 16px 0}
+    .exercise-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+    .exercise-row:last-child{border-bottom:none}
+    .ex-num{width:24px;height:24px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--sub);flex-shrink:0}
+    .ex-name{flex:1;font-size:14px;font-weight:600;color:var(--text)}
+    .ex-sets{font-size:12px;font-weight:600;color:var(--sub);background:var(--surface);padding:3px 8px;border-radius:999px}
+    .twc-cta{padding:14px 16px 16px}
+    .btn-start-workout{width:100%;height:50px;background:var(--accent);color:var(--text);font-size:16px;font-weight:700;border:none;border-radius:14px;cursor:pointer;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1)}
+    .btn-start-workout:active{transform:scale(0.97)}
+
+    .readiness-card{margin:0 24px 16px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.04)}
+    .readiness-label{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:12px}
+    .readiness-bars{display:flex;gap:8px;align-items:flex-end;height:48px}
+    .r-bar{flex:1;border-radius:4px;transition:height 0.5s ease}
+    .readiness-days{display:flex;gap:8px;margin-top:6px}
+    .r-day{flex:1;text-align:center;font-size:10px;color:var(--sub)}
+
+    .stats-row-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 24px 20px}
+    .stat-mini{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+    .stat-mini-val{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.5px;margin-bottom:2px;font-variant-numeric:tabular-nums}
+    .stat-mini-label{font-size:12px;color:var(--sub)}
+
+    /* ── TRAIN TAB ── */
+    .train-header{padding:20px 24px 16px}
+    .workout-history-card{margin:0 24px 12px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+    .wh-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .wh-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:2px}
+    .wh-meta{font-size:12px;color:var(--sub)}
+    .wh-rating{font-size:13px;color:var(--accent-warm,#FFD54F)}
+
+    /* ── TRACK TAB ── */
+    .cycle-calendar{margin:16px 24px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.04)}
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .cal-month{font-size:16px;font-weight:700;color:var(--text)}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+    .cal-day-label{text-align:center;font-size:10px;font-weight:600;color:var(--sub);padding-bottom:4px}
+    .cal-day{width:100%;aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--text)}
+    .cal-day.menstrual{background:rgba(178,81,72,0.15);color:#B25148}
+    .cal-day.follicular{background:rgba(123,166,139,0.12);color:#4F7A5C}
+    .cal-day.ovulatory{background:rgba(217,160,85,0.15);color:#C07030}
+    .cal-day.luteal{background:rgba(156,122,142,0.12);color:#7A5A6E}
+    .cal-day.today{border:2px solid var(--accent);font-weight:800}
+    .cal-day.empty{visibility:hidden}
+
+    .symptom-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 24px 20px}
+    .symptom-btn{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.2s;font-family:inherit}
+    .symptom-btn.active{background:rgba(244,158,175,0.12);border-color:var(--accent)}
+    .symptom-emoji{font-size:22px;margin-bottom:4px}
+    .symptom-label{font-size:11px;font-weight:600;color:var(--sub)}
+    .symptom-btn.active .symptom-label{color:var(--accent)}
+
+    /* ── PROFILE TAB ── */
+    .profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:36px;margin:24px auto 12px}
+    .profile-name{font-size:22px;font-weight:800;color:var(--text);text-align:center;margin-bottom:4px}
+    .profile-sub{font-size:14px;color:var(--sub);text-align:center;margin-bottom:24px}
+    .profile-stat-row{display:flex;gap:0;margin:0 24px 20px;background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+    .profile-stat{flex:1;padding:16px 8px;text-align:center;border-right:1px solid var(--border)}
+    .profile-stat:last-child{border-right:none}
+    .profile-stat-val{font-size:20px;font-weight:800;color:var(--text);margin-bottom:2px}
+    .profile-stat-label{font-size:11px;color:var(--sub)}
+    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);cursor:pointer}
+    .settings-row:active{background:var(--surface)}
+    .settings-label{font-size:15px;font-weight:600;color:var(--text)}
+    .settings-right{font-size:14px;color:var(--sub)}
+
+    /* ── FADE-IN ── */
+    .fade-in{opacity:0;transform:translateY(16px);animation:fi 0.45s ease-out forwards}
+    .fi-d1{animation-delay:0.1s}
+    .fi-d2{animation-delay:0.2s}
+    .fi-d3{animation-delay:0.3s}
+    @keyframes fi{to{opacity:1;transform:translateY(0)}}
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal-sheet{background:var(--card);border-radius:28px 28px 0 0;width:100%;max-width:393px;padding:24px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+    .modal-overlay.open .modal-sheet{transform:translateY(0)}
+    .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+  </style>
+</head>
+<body>
+<div id="app">
+<div id="phone-frame">
+<div class="app-shell">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <div class="status-time" id="status-time">10:41</div>
+    <div class="status-icons">●●● 🔋</div>
+  </div>
+
+  <!-- Tab Views -->
+  <div class="tab-view">
+
+    <!-- TODAY TAB -->
+    <div class="tab-content active" id="tab-today">
+      <div class="today-header">
+        <div class="today-greeting fade-in" id="greeting">Good morning 👋</div>
+        <div class="today-date fade-in fi-d1" id="today-date">Sunday, 25 May</div>
+
+        <!-- Phase Hero -->
+        <div class="phase-hero-card fade-in fi-d2">
+          <div class="phase-ring-sm">
+            <svg viewBox="0 0 72 72" fill="none">
+              <circle cx="36" cy="36" r="32" stroke="#EAE0E4" stroke-width="1.5"/>
+              <circle cx="36" cy="4" r="5" fill="#F49EAF"/>
+              <circle cx="68" cy="36" r="3.5" fill="#D9A055"/>
+              <circle cx="36" cy="68" r="3.5" fill="#9C7A8E"/>
+              <circle cx="4"  cy="36" r="3.5" fill="#7BA68B"/>
+              <!-- arc for follicular -->
+              <path d="M 36 4 A 32 32 0 0 1 68 36" stroke="#7BA68B" stroke-width="3" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="phase-info-label">Follicular Phase</div>
+            <div class="phase-info-day">Day 8 of your cycle</div>
+            <div class="phase-info-tip">Energy is rising. Great time to push heavier compound lifts.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title-sm fade-in fi-d2">Today's Workout</div>
+
+      <!-- Workout Card -->
+      <div class="today-workout-card fade-in fi-d3">
+        <div class="twc-header">
+          <div>
+            <div class="twc-tag">AI Generated · Follicular</div>
+            <div class="twc-name">Upper Body Strength A</div>
+            <div class="twc-meta">5 exercises · 4×5 · ~60 min</div>
+          </div>
+          <div class="twc-phase-dot">🌱</div>
+        </div>
+        <div class="twc-exercises">
+          <div class="exercise-row"><div class="ex-num">1</div><div class="ex-name">Barbell Back Squat</div><div class="ex-sets">4×5</div></div>
+          <div class="exercise-row"><div class="ex-num">2</div><div class="ex-name">Romanian Deadlift</div><div class="ex-sets">3×8</div></div>
+          <div class="exercise-row"><div class="ex-num">3</div><div class="ex-name">Barbell Hip Thrust</div><div class="ex-sets">3×10</div></div>
+          <div class="exercise-row"><div class="ex-num">4</div><div class="ex-name">Bulgarian Split Squat</div><div class="ex-sets">3×8</div></div>
+          <div class="exercise-row"><div class="ex-num">5</div><div class="ex-name">Leg Press</div><div class="ex-sets">2×12</div></div>
+        </div>
+        <div class="twc-cta">
+          <button class="btn-start-workout" id="btn-start-workout">Start Workout →</button>
+        </div>
+      </div>
+
+      <!-- Readiness -->
+      <div class="readiness-card fade-in fi-d3">
+        <div class="readiness-label">Weekly Readiness</div>
+        <div class="readiness-bars" id="readiness-bars"></div>
+        <div class="readiness-days" id="readiness-days"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row-grid fade-in fi-d3">
+        <div class="stat-mini">
+          <div class="stat-mini-val">🔥 12</div>
+          <div class="stat-mini-label">Day streak</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val">Day 8</div>
+          <div class="stat-mini-label">Of your cycle</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val">4</div>
+          <div class="stat-mini-label">Workouts this week</div>
+        </div>
+        <div class="stat-mini">
+          <div class="stat-mini-val">18</div>
+          <div class="stat-mini-label">Days until period</div>
+        </div>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- TRAIN TAB -->
+    <div class="tab-content" id="tab-train">
+      <div class="train-header">
+        <div class="today-date">Train</div>
+        <div style="font-size:14px;color:var(--sub);margin-top:4px">Your recent sessions</div>
+      </div>
+
+      <div class="section-title-sm">Recent Workouts</div>
+      <div id="workout-history"></div>
+
+      <div class="section-title-sm">Upcoming this week</div>
+      <div id="upcoming-workouts"></div>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- TRACK TAB -->
+    <div class="tab-content" id="tab-track">
+      <div class="train-header">
+        <div class="today-date">Track</div>
+        <div style="font-size:14px;color:var(--sub);margin-top:4px">Your cycle & symptoms</div>
+      </div>
+
+      <div class="cycle-calendar" id="cycle-calendar"></div>
+
+      <div class="section-title-sm">How do you feel today?</div>
+      <div class="symptom-grid" id="symptom-grid"></div>
+      <div style="height:20px"></div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div class="tab-content" id="tab-profile">
+      <div class="profile-avatar" id="profile-avatar">🌸</div>
+      <div class="profile-name" id="profile-name">Your Name</div>
+      <div class="profile-sub">FlowState Member · 12-day streak 🔥</div>
+
+      <div class="profile-stat-row">
+        <div class="profile-stat"><div class="profile-stat-val">28</div><div class="profile-stat-label">Cycle length</div></div>
+        <div class="profile-stat"><div class="profile-stat-val">5</div><div class="profile-stat-label">Bleed days</div></div>
+        <div class="profile-stat"><div class="profile-stat-val">Day 8</div><div class="profile-stat-label">Today</div></div>
+      </div>
+
+      <div class="settings-row" id="s-edit"><div class="settings-label">Edit Profile</div><div class="settings-right">›</div></div>
+      <div class="settings-row"><div class="settings-label">Cycle Settings</div><div class="settings-right">›</div></div>
+      <div class="settings-row"><div class="settings-label">Notifications</div><div class="settings-right">›</div></div>
+      <div class="settings-row"><div class="settings-label">Privacy & Data</div><div class="settings-right">›</div></div>
+      <div class="settings-row"><div class="settings-label">Connected Wearables</div><div class="settings-right" style="font-size:12px;background:#F4EAEF;padding:3px 8px;border-radius:999px;color:var(--accent)">Coming soon</div></div>
+      <div class="settings-row" id="s-redo" style="cursor:pointer"><div class="settings-label" style="color:var(--accent)">Redo Onboarding →</div><div class="settings-right"></div></div>
+      <div style="height:20px"></div>
+    </div>
+
+  </div><!-- /tab-view -->
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tbtn-today" onclick="switchTab('today')">
+      <span class="tab-icon">☀️</span>
+      <span class="tab-label">Today</span>
+    </button>
+    <button class="tab-btn" id="tbtn-train" onclick="switchTab('train')">
+      <span class="tab-icon">🏋️</span>
+      <span class="tab-label">Train</span>
+    </button>
+    <button class="tab-btn" id="tbtn-track" onclick="switchTab('track')">
+      <span class="tab-icon">🌙</span>
+      <span class="tab-label">Track</span>
+    </button>
+    <button class="tab-btn" id="tbtn-profile" onclick="switchTab('profile')">
+      <span class="tab-icon">👤</span>
+      <span class="tab-label">Profile</span>
+    </button>
+  </div>
+
+</div><!-- /app-shell -->
+</div><!-- /phone-frame -->
+<div id="desktop-hint" style="text-align:center;color:rgba(255,255,255,0.35);font-size:13px;font-family:Inter,sans-serif;line-height:1.6">
+  <p>📱 FlowState MVP Demo</p>
+  <p>Works on Android, iPhone & desktop</p>
+</div>
+</div><!-- /app -->
+
+<!-- Workout Modal -->
+<div class="modal-overlay" id="workout-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px">Workout Started! 💪</div>
+    <div style="font-size:14px;color:var(--sub);margin-bottom:24px">Upper Body Strength A · Follicular Phase</div>
+    <div style="background:var(--surface);border-radius:16px;padding:16px;margin-bottom:20px">
+      <div style="font-size:13px;font-weight:600;color:var(--sub);margin-bottom:8px">NEXT EXERCISE</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px">Barbell Back Squat</div>
+      <div style="font-size:14px;color:var(--sub)">Set 1 of 4 · 5 reps · Suggested: 60 kg</div>
+    </div>
+    <button onclick="closeModal()" style="width:100%;height:52px;background:var(--accent);color:var(--text);font-size:16px;font-weight:700;border:none;border-radius:14px;cursor:pointer">Complete Set →</button>
+    <button onclick="closeModal()" style="width:100%;height:44px;background:none;border:none;font-size:14px;color:var(--sub);cursor:pointer;margin-top:8px">End Workout</button>
+  </div>
+</div>
+
+<script>
+// ── Load profile from onboarding ──────────────────────────────
+function getProfile() {
+  try {
+    const raw = localStorage.getItem('fsUserProfile');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+
+const profile = getProfile();
+const userName = profile?.name || 'You';
+
+// ── Greeting & date ──────────────────────────────────────────
+const hour = new Date().getHours();
+const greetingText = hour < 12 ? 'Good morning 👋' : hour < 18 ? 'Good afternoon 👋' : 'Good evening 👋';
+document.getElementById('greeting').textContent = greetingText;
+
+const now = new Date();
+document.getElementById('today-date').textContent = now.toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long' });
+document.getElementById('status-time').textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:false });
+
+// ── Profile ───────────────────────────────────────────────────
+if (userName !== 'You') {
+  document.getElementById('profile-name').textContent = userName;
+}
+
+// ── Readiness bars ────────────────────────────────────────────
+const days = ['M','T','W','T','F','S','S'];
+const levels = [4, 3, 5, 2, 4, 5, 3];
+const colors = { 1:'#B25148', 2:'#C89B4A', 3:'#8E8689', 4:'#7BA68B', 5:'#F49EAF' };
+const barsEl = document.getElementById('readiness-bars');
+const daysEl = document.getElementById('readiness-days');
+days.forEach((d, i) => {
+  const bar = document.createElement('div');
+  bar.className = 'r-bar';
+  bar.style.cssText = `height:${levels[i]/5*100}%;background:${colors[levels[i]]};border-radius:4px;opacity:${i===6?1:0.55}`;
+  barsEl.appendChild(bar);
+  const day = document.createElement('div');
+  day.className = 'r-day';
+  day.textContent = d;
+  if (i === 6) day.style.fontWeight = '700';
+  daysEl.appendChild(day);
+});
+
+// ── Workout history ────────────────────────────────────────────
+const recentWorkouts = [
+  { name:'Lower Body Strength B', date:'Yesterday', duration:'58 min', rating:'★★★★★', icon:'🦵', phase:'follicular' },
+  { name:'Upper Body Hypertrophy', date:'Thu, 22 May', duration:'63 min', rating:'★★★★☆', icon:'💪', phase:'follicular' },
+  { name:'Active Recovery', date:'Wed, 21 May', duration:'30 min', rating:'★★★☆☆', icon:'🧘', phase:'menstrual' },
+];
+const histContainer = document.getElementById('workout-history');
+recentWorkouts.forEach(w => {
+  const phaseColors = { follicular:'rgba(123,166,139,0.15)', menstrual:'rgba(178,81,72,0.12)', ovulatory:'rgba(217,160,85,0.15)', luteal:'rgba(156,122,142,0.12)' };
+  histContainer.innerHTML += `
+    <div class="workout-history-card">
+      <div class="wh-icon" style="background:${phaseColors[w.phase]}">${w.icon}</div>
+      <div style="flex:1">
+        <div class="wh-name">${w.name}</div>
+        <div class="wh-meta">${w.date} · ${w.duration}</div>
+      </div>
+      <div class="wh-rating">${w.rating}</div>
+    </div>
+  `;
+});
+
+const upcoming = [
+  { name:'Rest Day', date:'Tomorrow', icon:'💤', note:'Luteal transition — light movement only' },
+  { name:'Lower Body Power', date:'Tue, 27 May', icon:'⚡', note:'Follicular peak — hit your PRs' },
+];
+const upcomingEl = document.getElementById('upcoming-workouts');
+upcoming.forEach(w => {
+  upcomingEl.innerHTML += `
+    <div class="workout-history-card" style="opacity:0.75">
+      <div class="wh-icon" style="background:rgba(244,158,175,0.1)">${w.icon}</div>
+      <div style="flex:1">
+        <div class="wh-name">${w.name}</div>
+        <div class="wh-meta">${w.date}</div>
+        <div style="font-size:11px;color:#8E8689;margin-top:2px">${w.note}</div>
+      </div>
+    </div>
+  `;
+});
+
+// ── Cycle Calendar ────────────────────────────────────────────
+const calEl = document.getElementById('cycle-calendar');
+const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const today = new Date();
+const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+
+// Simulate cycle: period started May 18, cycle day 8 = May 25
+const cycleStart = 18;
+const phaseFor = (d) => {
+  const cd = d - cycleStart + 1;
+  if (cd < 1 || cd > 28) return '';
+  if (cd <= 5) return 'menstrual';
+  if (cd <= 13) return 'follicular';
+  if (cd <= 16) return 'ovulatory';
+  return 'luteal';
+};
+
+calEl.innerHTML = `
+  <div class="cal-header">
+    <div class="cal-month">${monthNames[today.getMonth()]} ${today.getFullYear()}</div>
+    <div style="display:flex;gap:8px">
+      <div style="width:10px;height:10px;background:#B25148;border-radius:2px"></div>
+      <div style="width:10px;height:10px;background:#7BA68B;border-radius:2px"></div>
+      <div style="width:10px;height:10px;background:#D9A055;border-radius:2px"></div>
+      <div style="width:10px;height:10px;background:#9C7A8E;border-radius:2px"></div>
+    </div>
+  </div>
+  <div class="cal-grid">
+    ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<div class="cal-day-label">${d}</div>`).join('')}
+    ${Array(firstDay).fill('<div class="cal-day empty">.</div>').join('')}
+    ${Array.from({length:daysInMonth}, (_,i) => {
+      const d = i + 1;
+      const phase = phaseFor(d);
+      const isToday = d === today.getDate();
+      return `<div class="cal-day ${phase} ${isToday ? 'today' : ''}">${d}</div>`;
+    }).join('')}
+  </div>
+`;
+
+// ── Symptoms ──────────────────────────────────────────────────
+const symptoms = [
+  { emoji:'😴', label:'Tired' },
+  { emoji:'💪', label:'Strong' },
+  { emoji:'🤕', label:'Cramps' },
+  { emoji:'😊', label:'Good mood' },
+  { emoji:'🧠', label:'Focused' },
+  { emoji:'💧', label:'Bloated' },
+];
+const symptomEl = document.getElementById('symptom-grid');
+symptoms.forEach((s, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'symptom-btn';
+  btn.innerHTML = `<div class="symptom-emoji">${s.emoji}</div><div class="symptom-label">${s.label}</div>`;
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    if (navigator.vibrate) navigator.vibrate(10);
+  });
+  symptomEl.appendChild(btn);
+});
+
+// ── Tab switching ─────────────────────────────────────────────
+function switchTab(tab) {
+  if (navigator.vibrate) navigator.vibrate(10);
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('tbtn-' + tab).classList.add('active');
+}
+
+// ── Workout modal ─────────────────────────────────────────────
+document.getElementById('btn-start-workout').addEventListener('click', () => {
+  if (navigator.vibrate) navigator.vibrate(20);
+  document.getElementById('workout-modal').classList.add('open');
+});
+function closeModal() {
+  document.getElementById('workout-modal').classList.remove('open');
+}
+document.getElementById('workout-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('workout-modal')) closeModal();
+});
+
+// ── Redo onboarding link ──────────────────────────────────────
+document.getElementById('s-redo')?.addEventListener('click', () => {
+  window.location.href = 'onboarding.html';
+});
+
+// ── Edit profile ──────────────────────────────────────────────
+document.getElementById('s-edit')?.addEventListener('click', () => {
+  window.location.href = 'onboarding.html';
+});
+</script>
+</body>
+</html>
